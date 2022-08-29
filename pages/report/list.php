@@ -41,12 +41,12 @@ if (!empty($_GET['status'])) {
     <div class="container-fluid">
       <div class="row mb-2">
         <div class="col-sm-6">
-          <h1 class="m-0">User's Record</h1>
+          <h1 class="m-0">Report </h1>
         </div><!-- /.col -->
         <div class="col-sm-6">
           <ol class="breadcrumb float-sm-right">
             <li class="breadcrumb-item"><a href="#">User Management</a></li>
-            <li class="breadcrumb-item active">User's Record</li>
+            <li class="breadcrumb-item active">User's Reports</li>
           </ol>
         </div><!-- /.col -->
       </div><!-- /.row -->
@@ -151,7 +151,7 @@ include('../../docs/_includes/footer.php');
                         <td>` + data.TaskDescription + `</td>
                         <td>` + data.TaskRate + `</td>
 
-                        <td>` + data.TaskStatus + `</td>
+                        <td>` + status + `</td>
                         <td>
                         <a href="add.php?id=` + data.TaskID + `" class="btn btn-primary edit-user">
                          <span class="fas fa-pencil-alt"></span>

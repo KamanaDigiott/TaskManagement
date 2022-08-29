@@ -130,18 +130,11 @@ include('../../docs/_includes/footer.php');
         action: 'select'
       },
       success: function(result, xhr, ajaxOptions) {
-        var status='';
         console.log(result);
         if (result.success) {
           let daftar = result.data;
           var html = '';
           $.each(daftar, function(i, data) {
-            if (data.TaskStatus == '1') {
-                status = `<button data-id=` + data.id + ` class=" btn btn-success active" type="button">Active</button>`;
-              }
-              else {
-                status = `<button data-id=` + data.id + ` class="btn btn-danger active" type="button" >Inactive</button>`;
-              }
             html += `<tr>
                         <td> ` + (i + 1) + `</td>
                         <td> ` + data.TaskID + `</td>

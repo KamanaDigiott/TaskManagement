@@ -7,7 +7,7 @@ use Firebase\JWT\Key;
 
 header("Access-Control-Allow-Origin: *");
 header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST,GET");
+header("Access-Control-Allow-Methods: *");
 header("Access-Control-Max-Age: 3600");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 $secret_key = "YOUR_SECRET_KEY";
@@ -15,6 +15,7 @@ $jwt = null;
 $databaseService = new DatabaseService();
 $conn = $databaseService->getConnection();
 $data = json_decode(file_get_contents("php://input"));
+
 $authHeader = $_SERVER['HTTP_AUTHORIZATION'];
 $arr = explode(" ", $authHeader);
 /*echo json_encode(array(
@@ -22,72 +23,74 @@ $arr = explode(" ", $authHeader);
 ));*/
 $record = [];
 $error = [];
-$table_name = 'users';
+
 $jwt = $arr[1];
-// echo $jwt;exit();
-// print_r($data); exit();
+
 if ($jwt) {
 
   try {
 
     $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));
     if ($decoded) {
-print_r($data);
+      // echo json_encode(array(
+      //   "message" => "Access granted:"
+      // ));
+
+      $location = "uploads/";
       if (isset($data->action)) {
         if ($data->action == 'insert') {
-          $name = $data->name;
-          $email = $data->email;
-          $password = $data->password;
-          $query = "INSERT INTO " . $table_name . "
-                SET name = :name,
-                    email = :email,
-                    password = :password";
-          $stmt = $conn->prepare($query);
-
-          $stmt->bindParam(':name', $name);
-          $stmt->bindParam(':email', $email);
-
-          $password_hash = password_hash($password, PASSWORD_BCRYPT);
-
-          $stmt->bindParam(':password', $password_hash);
-          // print_r($stmt); exit();
-
-          if ($stmt->execute()) {
-            http_response_code(200);
-            echo json_encode(array("message" => "User was successfully registered."));
+          $taskID = $data->taskID;
+          $taskTitle = $data->taskTitle;
+          $taskDesc = $data->taskDesc;
+          $taskRate = $data->taskRate;
+          if ($taskID != '') {
+            $update = "update tasks set TaskID='$taskID',TaskTitle='$taskTitle',TaskDescription='$taskDesc',TaskRate='$taskRate' where TaskID='$taskID'";
+            $stmt = $conn->prepare($update);
+              if ($stmt->execute()) {
+                echo json_encode(array("message" => "Task Rate Updated Successfully","success"=>true));
+              }
           } else {
-            http_response_code(400);
-            echo json_encode(array("message" => "Unable to register the user."));
+            $taskImage = $_FILES['file']['name'];
+            $targetFilePath = $location . $taskImage;
+            if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath)) {
+              $insert = "insert into tasks(TaskID,TaskTitle,TaskDescription,TaskImage,TaskRate) value('$taskID','$taskTitle','$taskDesc','$taskImage','$taskRate')";
+              $stmt = $conn->prepare($insert);
+              if ($stmt->execute()) {
+                echo json_encode(array("message" => "Task Created Successfully"));
+              }
+            }
+          }
+        }
+
+        if ($data->action == 'update') {
+          $taskTitle = $data->taskTitle;
+          $taskDesc = $data->taskDesc;
+          $select = "update tasks set TaskTitle='$taskTitle',TaskDescription='$taskDesc',UpdatedOn=now() where ID='" . $_POST['ID'] . "'";
+          $stmt = $conn->prepare($select);
+          $stmt->execute();
+          if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(array("message" => "Task Updated Successfully", "success" => true));
           }
         }
 
         if ($data->action == 'delete') {
-          $select = "update users set DeletedOn=now() where ID='" . $data->ID . "'";
+          $select = "update tasks set DeletedOn=now() where ID='" . $data->ID . "'";
           $stmt = $conn->prepare($select);
           if ($stmt->execute()) {
             echo json_encode(array("message" => "Task Deleted Successfully", "success" => true));
           }
         }
       }
-      if(isset($_GET['action'])){
-        if ($_GET['action'] == 'select') {
-          $select = "select * from users where DeletedOn IS NULL order by id desc";
-        //  echo $select;exit();
-         $stmt = $conn->prepare($select);
-          $stmt->execute();
-          // echo $stmt->rowCount(); exit();
-          if ($stmt->rowCount() > 0) {
-            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            echo json_encode(array("data" => $row, "success" => true));
-          }
-        }
 
-        if ($_GET['action'] == 'select_id') {
-          $select = "select * from users where TaskID='" . $data->taskID . "'";
+
+      if (isset($_GET['action'])) {
+        if ($_GET['action'] == 'select') {
+          $select = "select * from tasks where DeletedOn IS NULL order by ID desc";
           $stmt = $conn->prepare($select);
           $stmt->execute();
           if ($stmt->rowCount() > 0) {
-            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
             echo json_encode(array("data" => $row, "success" => true));
           }
         }
@@ -112,11 +115,15 @@ print_r($data);
 
   //   echo json_encode($data);
   // }
-      }
-      else {
-        echo json_encode(array(
-          "message" => "Action is Needed."
-        ));
+        if ($_GET['action'] == 'select_id') {
+          $select = "select * from tasks where TaskID='" . $_GET['taskID'] . "'";
+          $stmt = $conn->prepare($select);
+          $stmt->execute();
+          if ($stmt->rowCount() > 0) {
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+            echo json_encode(array("data" => $row, "success" => true));
+          }
+        }
       }
     }
   } catch (Exception $e) {

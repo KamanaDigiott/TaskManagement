@@ -94,26 +94,7 @@ if ($jwt) {
             echo json_encode(array("data" => $row, "success" => true));
           }
         }
-        // if ($_GET['action'] == 'active') {
-  //   $status = "select * from carwashtypes where CarwashID='" . $_GET['id'] . "'";
-  //   $res = mysqli_query($conn, $status);
-  //   $row = mysqli_fetch_assoc($res);
-  //   if ($row['CarwashStatus'] == '1') {
-  //     $update = "update carwashtypes set CarwashStatus='0' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   } else {
-  //     $update = "update carwashtypes set CarwashStatus='1' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   }
 
-  //   echo json_encode($data);
-  // }
         if ($_GET['action'] == 'select_id') {
           $select = "select * from tasks where TaskID='" . $_GET['taskID'] . "'";
           $stmt = $conn->prepare($select);

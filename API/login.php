@@ -22,7 +22,7 @@ $ip = $data->ip;
 $lat = $data->lat;
 $long = $data->long;
 $table_name = 'users';
-$query = "SELECT id, name, password FROM " . $table_name . " WHERE email = ? LIMIT 0,1";
+$query = "SELECT * FROM " . $table_name . " WHERE email = ? LIMIT 0,1";
 
 $stmt = $conn->prepare($query);
 $stmt->bindParam(1, $email);
