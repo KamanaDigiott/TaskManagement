@@ -156,7 +156,7 @@ include('../../docs/_includes/footer.php');
           contentType: false,
           success: function(result) {
             console.log(result);
-            if (result.token) {
+            if (result.success) {
               $("#registrationForm").html(
                 '<div class="alert alert-success">' + result.message + "</div>"
               );

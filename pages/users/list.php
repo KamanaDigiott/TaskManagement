@@ -117,25 +117,23 @@ include('../../docs/_includes/footer.php');
       dataType: 'json',
       contentType: "application/x-www-form-urlencoded",
       headers: {
-
         "Authorization": `Bearer ${token}`
       },
       data: {
         action: 'select'
       },
       success: function(result, xhr, ajaxOptions) {
-        var status='';
+        var status = '';
         console.log(result);
         if (result.success) {
           let daftar = result.data;
           var html = '';
           $.each(daftar, function(i, data) {
             if (data.UserStatus == '1') {
-                status = `<button data-id=` + data.id + ` class=" btn btn-success active" type="button">Active</button>`;
-              }
-              else {
-                status = `<button data-id=` + data.id + ` class="btn btn-danger active" type="button" >Inactive</button>`;
-              }
+              status = `<button data-id=` + data.id + ` class=" btn btn-success active" type="button">Active</button>`;
+            } else {
+              status = `<button data-id=` + data.id + ` class="btn btn-danger active" type="button" >Inactive</button>`;
+            }
             html += `<tr>
                         <td> ` + (i + 1) + `</td>
                         <td> ` + data.name + `</td>
@@ -150,7 +148,6 @@ include('../../docs/_includes/footer.php');
                         </button>
                         </td>
                     </tr>`;
-
             //This is selector of my <tbody> in my table
             $("#list-list").html(html);
           });

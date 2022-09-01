@@ -191,6 +191,15 @@ if (!isset($_SESSION['id'])) {
                 </p>
               </a>
             </li>
+            <li class="nav-item">
+              <a href="../../pages/loggedIn/list.php" class="nav-link">
+                <i class="nav-icon fas fa-users"></i>
+                <p>
+                 Users's Login Status
+                  <!-- <i class="right fas fa-angle-left"></i> -->
+                </p>
+              </a>
+            </li>
 
             <li class="nav-item">
               <a href="../../pages/tasks/list.php" class="nav-link">
@@ -220,7 +229,7 @@ if (!isset($_SESSION['id'])) {
               </a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" onclick="logout(); return false;" >
+              <a class="nav-link" onclick="logout(); return false;">
                 <i class="nav-icon fas fa-sign-out-alt"></i>
                 <p>
                   Logout
@@ -237,6 +246,7 @@ if (!isset($_SESSION['id'])) {
     <script src="../../plugins/jquery/jquery.min.js"></script>
     <script>
       var token = "<?php echo $_SESSION['token']; ?>";
+
       function logout() {
         var formData = {
           action: "admin_logout"
@@ -259,6 +269,17 @@ if (!isset($_SESSION['id'])) {
               }, 200);
             }
           },
+          error: function(xhr, ajaxOptions, thrownError) {
+            // alert(xhr.status);
+            console.log(thrownError);
+            if (thrownError == 'Unauthorized') {
+              $("body").html('<div class="alert alert-success text-center" style="margin:30%;">Session Expired</div>');
+              setTimeout(function() {
+                location.href = '../../index.php';
+              }, 300);
+            }
+
+          }
         });
       }
     </script>

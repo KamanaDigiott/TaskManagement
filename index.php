@@ -1,15 +1,7 @@
 <?php
-//Get IP Address of User in PHP
-$ip = file_get_contents("https://www.geoplugin.com/ip.php");
-
-// //call api
-$url = file_get_contents("http://www.geoplugin.net/json.gp?ip=" . $ip);
-
-//decode json data
-$getInfo = json_decode($url);
-$lat = $getInfo->geoplugin_latitude;
-$long = $getInfo->geoplugin_longitude;
-// print_r($getInfo);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -99,22 +91,15 @@ $long = $getInfo->geoplugin_longitude;
   <script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
   <script>
     $(document).ready(function() {
-
-var lat=`<?php echo $lat ?>`;
-var long=`<?php echo $long ?>`;
-var ip=`<?php echo $ip ?>`;
       $("#loginForm").submit(function(event) {
         event.preventDefault();
-
+        alert();
         $.ajax({
           type: "POST",
           url: "http://127.0.0.1:8000/API/login.php",
           data: JSON.stringify({
             email: $("#email").val(),
-            password: $("#password").val(),
-            ip: ip,
-            lat: lat,
-            long: long,
+            password: $("#password").val()
           }),
           dataType: "json",
           encode: true,
@@ -122,7 +107,7 @@ var ip=`<?php echo $ip ?>`;
           console.log(data);
           if (data.email) {
             $(".card-body").html(
-              '<div class="alert alert-success">' + data.message + "</div>"
+              '<div class="alert alert-success">' + data.message + '</div>'
             );
             setTimeout(function() {
               window.location.href = 'pages/dashboard/dashboard.php';
@@ -131,13 +116,12 @@ var ip=`<?php echo $ip ?>`;
         }).fail(function(e) {
           console.log(e);
           $(".err").html(
-            '<p class="alert alert-danger">' + e.responseJSON.message + "</p>"
+            '<p class="alert alert-danger">' + e.responseJSON.message + '</p>'
           );
         });
       });
     });
   </script>
-
 </body>
 
 </html>

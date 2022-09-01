@@ -64,14 +64,6 @@ $id = @$_REQUEST['id'];
                     </div>
                   </div>
                 </div>
-                <div class="input-group mb-3" id="task_rate">
-                  <input type="text" id="taskRate" name="taskRate" class="form-control" placeholder="Enter taskRate">
-                  <div class="input-group-append">
-                    <div class="input-group-text">
-                      <span class="fas fa-phone"></span>
-                    </div>
-                  </div>
-                </div>
                 <div class="input-group mb-3" id="file_upload">
                   <input type="file" id="file" name="file" class="form-control" placeholder="Enter file">
                   <div class="input-group-append">
@@ -94,7 +86,7 @@ $id = @$_REQUEST['id'];
                     <a href="list.php" class="btn btn-dark btn-block">Cancel</a>
                   </div>
                   <div class="col-2">
-                    <input type="submit" id="save-user" class="btn btn-primary btn-block" value="Add User" />
+                    <input type="submit" id="save-user" class="btn btn-primary btn-block" value="Add Task" />
                   </div>
                   <!-- /.col -->
                 </div>
@@ -134,11 +126,10 @@ include('../../docs/_includes/footer.php');
             console.log(result);
             let taskRec = result.data;
             // $('#registrationForm').append('<input type="hidden" id="id" name="id" value="' + taskRec.TaskID + '">')
-            $('#taskID').val(taskRec.TaskID).attr('disabled',true);
+            $('#taskID').val(taskRec.TaskID).attr('disabled', true);
             $('#taskTitle').val(taskRec.TaskTitle);
             $('#taskDesc').val(taskRec.TaskDescription);
-            $('#taskRate').val(taskRec.TaskRate);
-            $('#form_title').html('Update Task Rate');
+            $('#form_title').html('Update Task');
             $('#file_upload').css('display', 'none');
             $('#save-user').val('Save');
           }
@@ -169,9 +160,6 @@ include('../../docs/_includes/footer.php');
         taskDesc: {
           required: 'Please enter taskDesc.',
         },
-        taskRate: {
-          required: 'Please Enter taskRate.',
-        },
         file: {
           required: 'Please choose file.',
         }
@@ -187,17 +175,17 @@ include('../../docs/_includes/footer.php');
           taskRate: $("#taskRate").val(),
           action: 'insert',
         };
-        console.log(formData);
+        // console.log(formData);
         $.ajax({
-        type: 'POST',
-        url: 'http://127.0.0.1:8000/API/task.php',
-        dataType: "json",
-        headers: {
-          "Authorization": `Bearer ${token}`
-    },
-        data: JSON.stringify(formData),
-        processData: false,
-        contentType: false,
+          type: 'POST',
+          url: 'http://127.0.0.1:8000/API/task.php',
+          dataType: "json",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          data: JSON.stringify(formData),
+          processData: false,
+          contentType: false,
           success: function(result) {
             console.log(result);
             if (result.token) {
@@ -221,7 +209,5 @@ include('../../docs/_includes/footer.php');
         return false;
       }
     });
-
-
   });
 </script>

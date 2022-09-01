@@ -38,22 +38,23 @@ if ($jwt) {
 
       $location = "uploads/";
       if (isset($data->action)) {
+
         if ($data->action == 'insert') {
           $taskID = $data->taskID;
           $taskTitle = $data->taskTitle;
           $taskDesc = $data->taskDesc;
-          $taskRate = $data->taskRate;
           if ($taskID != '') {
-            $update = "update tasks set TaskID='$taskID',TaskTitle='$taskTitle',TaskDescription='$taskDesc',TaskRate='$taskRate' where TaskID='$taskID'";
+            $update = "update tasks set TaskID='$taskID',TaskTitle='$taskTitle',TaskDescription='$taskDesc' where TaskID='$taskID'";
             $stmt = $conn->prepare($update);
-              if ($stmt->execute()) {
-                echo json_encode(array("message" => "Task Rate Updated Successfully","success"=>true));
-              }
+            if ($stmt->execute()) {
+              echo json_encode(array("message" => "Task Rate Updated Successfully", "success" => true));
+            }
           } else {
             $taskImage = $_FILES['file']['name'];
             $targetFilePath = $location . $taskImage;
+            $UserID = $_SESSION['id'];
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath)) {
-              $insert = "insert into tasks(TaskID,TaskTitle,TaskDescription,TaskImage,TaskRate) value('$taskID','$taskTitle','$taskDesc','$taskImage','$taskRate')";
+              $insert = "insert into tasks(TaskID,UserID,TaskTitle,TaskDescription,TaskImage) value('$taskID','$UserID','$taskTitle','$taskDesc','$taskImage')";
               $stmt = $conn->prepare($insert);
               if ($stmt->execute()) {
                 echo json_encode(array("message" => "Task Created Successfully"));
@@ -65,7 +66,7 @@ if ($jwt) {
         if ($data->action == 'update') {
           $taskTitle = $data->taskTitle;
           $taskDesc = $data->taskDesc;
-          $select = "update tasks set TaskTitle='$taskTitle',TaskDescription='$taskDesc',UpdatedOn=now() where ID='" . $_POST['ID'] . "'";
+          $select = "update tasks set TaskTitle='$taskTitle',TaskDescription='$taskDesc',UpdatedOn=now() where TaskID='" . $data->TaskID. "'";
           $stmt = $conn->prepare($select);
           $stmt->execute();
           if ($stmt->rowCount() > 0) {
@@ -83,7 +84,6 @@ if ($jwt) {
         }
       }
 
-
       if (isset($_GET['action'])) {
         if ($_GET['action'] == 'select') {
           $select = "select * from tasks where DeletedOn IS NULL order by ID desc";
@@ -95,25 +95,25 @@ if ($jwt) {
           }
         }
         // if ($_GET['action'] == 'active') {
-  //   $status = "select * from carwashtypes where CarwashID='" . $_GET['id'] . "'";
-  //   $res = mysqli_query($conn, $status);
-  //   $row = mysqli_fetch_assoc($res);
-  //   if ($row['CarwashStatus'] == '1') {
-  //     $update = "update carwashtypes set CarwashStatus='0' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   } else {
-  //     $update = "update carwashtypes set CarwashStatus='1' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   }
+          //   $status = "select * from carwashtypes where CarwashID='" . $_GET['id'] . "'";
+          //   $res = mysqli_query($conn, $status);
+          //   $row = mysqli_fetch_assoc($res);
+          //   if ($row['CarwashStatus'] == '1') {
+          //     $update = "update carwashtypes set CarwashStatus='0' where CarwashID='" . $_GET['id'] . "'";
+          //     if (mysqli_query($conn, $update)) {
+          //       $data['success'] = true;
+          //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
+          //     }
+          //   } else {
+          //     $update = "update carwashtypes set CarwashStatus='1' where CarwashID='" . $_GET['id'] . "'";
+          //     if (mysqli_query($conn, $update)) {
+          //       $data['success'] = true;
+          //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
+          //     }
+          //   }
 
-  //   echo json_encode($data);
-  // }
+          //   echo json_encode($data);
+        // }
         if ($_GET['action'] == 'select_id') {
           $select = "select * from tasks where TaskID='" . $_GET['taskID'] . "'";
           $stmt = $conn->prepare($select);
@@ -126,9 +126,7 @@ if ($jwt) {
       }
     }
   } catch (Exception $e) {
-
     http_response_code(401);
-
     echo json_encode(array(
       "message" => "Access denied, User Unauthenticated.",
       "error" => $e->getMessage()

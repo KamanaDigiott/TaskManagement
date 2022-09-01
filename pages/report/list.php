@@ -4,7 +4,7 @@ include('../../docs/_includes/header.php');
 
 
 
-    // echo "Latitude:".$new_arr[0]['geoplugin_latitude']." and Longitude:".$new_arr[0]['geoplugin_longitude'];
+// echo "Latitude:".$new_arr[0]['geoplugin_latitude']." and Longitude:".$new_arr[0]['geoplugin_longitude'];
 if (!empty($_GET['status'])) {
   switch ($_GET['status']) {
     case 'succ':
@@ -70,15 +70,18 @@ if (!empty($_GET['status'])) {
           <div class="float-left pb-4 ">
             <form method="post">
               <div class="input-group">
-                <input class="form-control" placeholder="Search" type="text" name="taskID" id="taskID" />
-                <button type="button" class="btn btn-primary" name="search"><i class="fas fa-search"></i></button>
+                <select class="form-control" name="search" id="search">
+                  <option value=''>--Select User Status--</option>
+                  <option value="loggedIn">Login User</option>
+                  <option value="loggedOut">Logout User</option>
+                </select>
               </div>
             </form>
           </div>
           <div class="float-right pb-4">
-            <button href="javascript:void(0);" class="btn btn-success" onclick="formToggle('importFrm');"><i class="fas fa-plus"></i> Import</button>
-            <a href="../excels/export.php?action=export_user" class="btn btn-primary"><i class="fas fa-download"></i> Export</a>
-            <a href="add.php" class="btn btn-info"><i class="fas fa-plus"></i> Add New Task</a>
+            <!-- <button href="javascript:void(0);" class="btn btn-success" onclick="formToggle('importFrm');"><i class="fas fa-plus"></i> Import</button>
+            <a href="../excels/export.php?action=export_user" class="btn btn-primary"><i class="fas fa-download"></i> Export</a> -->
+            <!-- <a href="add.php" class="btn btn-info"><i class="fas fa-plus"></i> Add New Task</a> -->
           </div>
         </div>
         <!-- CSV file upload form -->
@@ -96,11 +99,11 @@ if (!empty($_GET['status'])) {
           <thead>
             <tr>
               <th>S. No.</th>
-              <th>Task ID</th>
-              <th>Task Image</th>
               <th>Task Title</th>
-              <th>Task Description</th>
-              <th>Task Rate</th>
+              <th>User Name</th>
+              <th>Email</th>
+              <th>Working Hours</th>
+              <th>Salary</th>
               <th>Status</th>
               <th>Action</th>
             </tr>
@@ -118,39 +121,45 @@ include('../../docs/_includes/footer.php');
 <script>
   $(document).ready(function() {
     var token = "<?php echo $_SESSION['token']; ?>";
-    $.ajax({
-      type: 'GET',
-      url: 'http://127.0.0.1:8000/API/task.php',
-      dataType: 'json',
-      contentType: "application/x-www-form-urlencoded",
-      headers: {
-        "Authorization": `Bearer ${token}`
-      },
-      data: {
-        action: 'select'
-      },
-      success: function(result, xhr, ajaxOptions) {
-        var status='';
-        console.log(result);
-        if (result.success) {
-          let daftar = result.data;
-          var html = '';
-          $.each(daftar, function(i, data) {
-            if (data.TaskStatus == '1') {
+    function onload() {
+      $.ajax({
+        type: 'GET',
+        url: 'http://127.0.0.1:8000/API/report.php',
+        dataType: 'json',
+        contentType: "application/x-www-form-urlencoded",
+        headers: {
+          "Authorization": `Bearer ${token}`
+        },
+        data: {
+          action: 'select'
+        },
+        success: function(result, xhr, ajaxOptions) {
+          var status = '';
+          console.log(result);
+          if (result.success) {
+            let daftar = result.data;
+            var html = '';
+            var taskRow = '';
+            $.each(daftar, function(i, data) {
+              let taskdata = data.tasks;
+
+              if (data.TaskStatus == '1') {
                 status = `<button data-id=` + data.id + ` class=" btn btn-success active" type="button">Active</button>`;
-              }
-              else {
+              } else {
                 status = `<button data-id=` + data.id + ` class="btn btn-danger active" type="button" >Inactive</button>`;
               }
-            html += `<tr>
+
+              $.each(data.tasks, function(i, task) {
+                console.log(task);
+                taskRow += `<p>` + (i + 1 + `. `) + task.TaskTitle + `</p>`
+              });
+              html += `<tr>
                         <td> ` + (i + 1) + `</td>
-                        <td> ` + data.TaskID + `</td>
-                        <td><img src='../../Api/uploads/` + data.TaskImage + `' height='50px' width='50px'></td>
-
-                        <td>` + data.TaskTitle + `</td>
-                        <td>` + data.TaskDescription + `</td>
-                        <td>` + data.TaskRate + `</td>
-
+                        <td> ` + taskRow + `</td>
+                        <td> ` + data.name + `</td>
+                        <td>` + data.email + `</td>
+                        <td>` + data.hours + ` hrs</td>
+                        <td>₹ ` + (data.hours * data.taskRate) + `</td>
                         <td>` + status + `</td>
                         <td>
                         <a href="add.php?id=` + data.TaskID + `" class="btn btn-primary edit-user">
@@ -162,18 +171,91 @@ include('../../docs/_includes/footer.php');
                         </td>
                     </tr>`;
 
-            //This is selector of my <tbody> in my table
-            $("#list-list").html(html);
-          });
-        } else {
-          $("#alert").append(
-            '<div class="alert-danger">' + result + "</div>"
-          );
+              //This is selector of my <tbody> in my table
+              $("#list-list").html(html);
+            });
+          } else {
+            $("#alert").append(
+              '<div class="alert-danger">' + result + "</div>"
+            );
+          }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+          alert(xhr.status);
+          console.log(thrownError);
         }
-      },
-      error: function(xhr, ajaxOptions, thrownError) {
-        alert(xhr.status);
-        console.log(thrownError);
+      });
+    }
+    onload();
+    $("#search").change(function() {
+      var status = $("#search").val();
+      if (status != '') {
+        $.ajax({
+          type: 'GET',
+          url: 'http://127.0.0.1:8000/API/report.php',
+          dataType: 'json',
+          contentType: "application/x-www-form-urlencoded",
+          headers: {
+            "Authorization": `Bearer ${token}`
+          },
+          data: {
+            action: 'activeInactiveUser',
+            status: status
+          },
+          success: function(result) {
+            var status = '';
+            console.log(result);
+            if (result.success) {
+              let daftar = result.data;
+              var html = '';
+              var taskRow = 'No Record';
+              $.each(daftar, function(i, data) {
+                if (data.id != null) {
+                  let taskdata = data.tasks;
+                  if (data.TaskStatus == '1') {
+                    status = `<button data-id=` + data.id + ` class=" btn btn-success active" type="button">Active</button>`;
+                  } else {
+                    status = `<button data-id=` + data.id + ` class="btn btn-danger active" type="button" >Inactive</button>`;
+                  }
+                  $.each(data.tasks, function(i, task) {
+                    console.log(task);
+                    taskRow += `<p>` + (i + 1 + `. `) + task.TaskTitle + `</p>`
+                  });
+                  html += `<tr>
+                        <td> ` + (i + 1) + `</td>
+                        <td> ` + taskRow + `</td>
+                        <td> ` + data.name + `</td>
+                        <td>` + data.email + `</td>
+                        <td>` + data.hours + ` hrs</td>
+                        <td>₹ ` + (data.hours * data.taskRate) + `</td>
+                        <td>` + status + `</td>
+                        <td>
+                        <a href="add.php?id=` + data.TaskID + `" class="btn btn-primary edit-user">
+                         <span class="fas fa-pencil-alt"></span>
+                        </a>
+                        <button type="button" class="btn btn-danger delete-user" data-id="` + data.TaskID + `" >
+                        <span class="fas fa-trash"></span>
+                        </button>
+                        </td>
+                    </tr>`;
+
+                  //This is selector of my <tbody> in my table
+                  $("#list-list").html(html);
+                }
+                else{
+                  $("#list-list").html(`<tr style="width:100%"><td colspan="8">No Record Found...</td></tr>`);
+                }
+
+              });
+            } else {
+              $("#alert").append(
+                '<div class="alert-danger">' + result + "</div>"
+              );
+            }
+          }
+        });
+      } else {
+        onload();
       }
     });
   });

@@ -32,9 +32,6 @@ if ($jwt) {
 
     $decoded = JWT::decode($jwt, new Key($secret_key, 'HS256'));
     if ($decoded) {
-      // echo json_encode(array(
-      //   "message" => "Access granted:"
-      // ));
 
       $location = "uploads/";
       if (isset($data->action)) {
@@ -46,9 +43,9 @@ if ($jwt) {
           if ($taskID != '') {
             $update = "update tasks set TaskID='$taskID',TaskTitle='$taskTitle',TaskDescription='$taskDesc',TaskRate='$taskRate' where TaskID='$taskID'";
             $stmt = $conn->prepare($update);
-              if ($stmt->execute()) {
-                echo json_encode(array("message" => "Task Rate Updated Successfully","success"=>true));
-              }
+            if ($stmt->execute()) {
+              echo json_encode(array("message" => "Task Rate Updated Successfully", "success" => true));
+            }
           } else {
             $taskImage = $_FILES['file']['name'];
             $targetFilePath = $location . $taskImage;
@@ -83,38 +80,30 @@ if ($jwt) {
         }
       }
 
-
       if (isset($_GET['action'])) {
         if ($_GET['action'] == 'select') {
-          $select = "select * from tasks where DeletedOn IS NULL order by ID desc";
+          $select = "SELECT SUM(TIMESTAMPDIFF(SECOND, login_details.LoginTime, login_details.LogoutTime)/3600) as hours,users.*,login_details.* FROM login_details INNER JOIN users on users.id=login_details.UserID where login_details.LogoutTime IS NOT NULL and DATE(login_details.CreatedOn) = DATE(NOW()) ORDER BY users.id DESC";
           $stmt = $conn->prepare($select);
           $stmt->execute();
           if ($stmt->rowCount() > 0) {
             $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // print_r($row);
+            foreach ($row as &$lst) {
+              // print_r($lst['id']);
+              $task = "select * from tasks where UserID='" . $lst['id'] . "'";
+              // echo $task;
+              $tasks = $conn->prepare($task);
+              // print_r($tasks) ;exit();
+              $tasks->execute();
+
+              $rows = $tasks->fetchAll(PDO::FETCH_ASSOC);
+              // print_r($rows) ;exit();s
+              $lst['tasks'] = $rows;
+            }
             echo json_encode(array("data" => $row, "success" => true));
           }
         }
 
-  // if ($_GET['action'] == 'active') {
-  //   $status = "select * from carwashtypes where CarwashID='" . $_GET['id'] . "'";
-  //   $res = mysqli_query($conn, $status);
-  //   $row = mysqli_fetch_assoc($res);
-  //   if ($row['CarwashStatus'] == '1') {
-  //     $update = "update carwashtypes set CarwashStatus='0' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   } else {
-  //     $update = "update carwashtypes set CarwashStatus='1' where CarwashID='" . $_GET['id'] . "'";
-  //     if (mysqli_query($conn, $update)) {
-  //       $data['success'] = true;
-  //       $data['message'] = 'carwashtypes Status Updated Successfully...!';
-  //     }
-  //   }
-
-  //   echo json_encode($data);
-  // }
         if ($_GET['action'] == 'select_id') {
           $select = "select * from tasks where TaskID='" . $_GET['taskID'] . "'";
           $stmt = $conn->prepare($select);
@@ -124,6 +113,46 @@ if ($jwt) {
             echo json_encode(array("data" => $row, "success" => true));
           }
         }
+
+        // API for get lists of login users
+
+        if ($_GET['action'] == 'activeInactiveUser') {
+          if ($_GET['status'] == 'loggedIn') {
+            $select = "SELECT SUM(TIMESTAMPDIFF(SECOND, login_details.LoginTime, login_details.LogoutTime)/3600) as hours,users.*,login_details.* FROM login_details INNER JOIN users on users.id=login_details.UserID where DATE(login_details.CreatedOn) = DATE(NOW()) and users.LoginStatus='LoggedOut' ORDER BY users.id DESC";
+            //  echo $select;exit();
+            $stmt = $conn->prepare($select);
+            $stmt->execute();
+            // echo $stmt->rowCount(); exit();
+            if ($stmt->rowCount() > 0) {
+              $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              echo json_encode(array("data" => $row, "success" => true));
+            }
+          }
+          if ($_GET['status'] == 'loggedOut') {
+            $select = "SELECT SUM(TIMESTAMPDIFF(SECOND, login_details.LoginTime, login_details.LogoutTime)/3600) as hours,users.*,login_details.* FROM login_details INNER JOIN users on users.id=login_details.UserID where login_details.LogoutTime IS NOT NULL and DATE(login_details.CreatedOn) = DATE(NOW()) and users.LoginStatus='LoggedIN' ORDER BY users.id DESC";
+            //  echo $select;exit();
+            $stmt = $conn->prepare($select);
+            $stmt->execute();
+            // echo $stmt->rowCount(); exit();
+            if ($stmt->rowCount() > 0) {
+              $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+              echo json_encode(array("data" => $row, "success" => true));
+            }
+          }
+        }
+        // API for get lists of login users
+
+        // if ($_GET['action'] == 'loggedOutUser') {
+        //   $select = "SELECT SUM(TIMESTAMPDIFF(SECOND, login_details.LoginTime, login_details.LogoutTime)/3600) as hours,users.*,login_details.* FROM login_details INNER JOIN users on users.id=login_details.UserID where DATE(login_details.CreatedOn) = DATE(NOW()) and users.LoginStatus='LoggedOut' ORDER BY users.id DESC";
+        //   //  echo $select;exit();
+        //   $stmt = $conn->prepare($select);
+        //   $stmt->execute();
+        //   // echo $stmt->rowCount(); exit();
+        //   if ($stmt->rowCount() > 0) {
+        //     $row = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        //     echo json_encode(array("data" => $row, "success" => true));
+        //   }
+        // }
       }
     }
   } catch (Exception $e) {
