@@ -40,21 +40,48 @@ if ($jwt) {
       if (isset($data->action)) {
 
         if ($data->action == 'insert') {
-          $taskID = $data->taskID;
-          $taskTitle = $data->taskTitle;
+          $length = 6;
+          $characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+          $charactersLength = strlen($characters);
+          $randomString = '';
+          for ($i = 0; $i < $length; $i++) {
+            $randomString .= $characters[rand(0, $charactersLength - 1)];
+          }
+          $taskID= date("y") . $randomString;
           $taskDesc = $data->taskDesc;
           if ($taskID != '') {
-            $update = "update tasks set TaskID='$taskID',TaskTitle='$taskTitle',TaskDescription='$taskDesc' where TaskID='$taskID'";
+            $update = "update tasks set TaskID='$taskID',TaskDescription='$taskDesc' where TaskID='$taskID'";
             $stmt = $conn->prepare($update);
             if ($stmt->execute()) {
               echo json_encode(array("message" => "Task Rate Updated Successfully", "success" => true));
             }
           } else {
-            $taskImage = $_FILES['file']['name'];
+            $fileNames = array_filter($_FILES['files']['name']);
             $targetFilePath = $location . $taskImage;
             $UserID = $_SESSION['id'];
+            if(!empty($fileNames)){
+              foreach($_FILES['files']['name'] as $key=>$val){
+                  // File upload path
+                  $fileName = basename($_FILES['files']['name'][$key]);
+                  $targetFilePath = $targetDir . $fileName;
+
+                  // Check whether file type is valid
+                  $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+                  if(in_array($fileType, $allowTypes)){
+                      // Upload file to server
+                      if(move_uploaded_file($_FILES["files"]["tmp_name"][$key], $targetFilePath)){
+                          // Image db insert sql
+                          $insertValuesSQL .= "('".$fileName."', NOW()),";
+                      }else{
+                          $errorUpload .= $_FILES['files']['name'][$key].' | ';
+                      }
+                  }else{
+                      $errorUploadType .= $_FILES['files']['name'][$key].' | ';
+                  }
+              }
+            }
             if (move_uploaded_file($_FILES["file"]["tmp_name"], $targetFilePath)) {
-              $insert = "insert into tasks(TaskID,UserID,TaskTitle,TaskDescription,TaskImage) value('$taskID','$UserID','$taskTitle','$taskDesc','$taskImage')";
+              $insert = "insert into tasks(TaskID,UserID,TaskDescription,TaskImage) value('$taskID','$UserID','$taskTitle','$taskDesc','$taskImage')";
               $stmt = $conn->prepare($insert);
               if ($stmt->execute()) {
                 echo json_encode(array("message" => "Task Created Successfully"));

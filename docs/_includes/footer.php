@@ -26,6 +26,8 @@
 <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.js" ></script>
 <script src="../../plugins/datatables-bs4/js/dataTables.bootstrap4.min.js" ></script>
 <script src="../../plugins/jquery-ui/jquery-ui.min.js"></script>
+<!-- <script src="https://maps.googleapis.com/maps/api/js?callback=initMap" async defer></script> -->
+<!-- <script src="https://maps.googleapis.com/maps/api/js?key=MYKEY&callback=initialize" async defer></script> -->
 <!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
 <script>
   $.widget.bridge('uibutton', $.ui.button)

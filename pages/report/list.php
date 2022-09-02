@@ -105,6 +105,7 @@ if (!empty($_GET['status'])) {
               <th>Working Hours</th>
               <th>Salary</th>
               <th>Status</th>
+              <th>Location</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -121,6 +122,7 @@ include('../../docs/_includes/footer.php');
 <script>
   $(document).ready(function() {
     var token = "<?php echo $_SESSION['token']; ?>";
+
     function onload() {
       $.ajax({
         type: 'GET',
@@ -153,6 +155,7 @@ include('../../docs/_includes/footer.php');
                 console.log(task);
                 taskRow += `<p>` + (i + 1 + `. `) + task.TaskTitle + `</p>`
               });
+
               html += `<tr>
                         <td> ` + (i + 1) + `</td>
                         <td> ` + taskRow + `</td>
@@ -161,6 +164,10 @@ include('../../docs/_includes/footer.php');
                         <td>` + data.hours + ` hrs</td>
                         <td>₹ ` + (data.hours * data.taskRate) + `</td>
                         <td>` + status + `</td>
+                        <td>
+                        <iframe src="https://maps.google.com/maps?q=` + data.Latitude + `,` + data.Longitude + `&hl=es;z=14&amp;output=embed" width="80%" height="100px" frameborder="0" ></iframe>
+                        </div>
+                        </td>
                         <td>
                         <a href="add.php?id=` + data.TaskID + `" class="btn btn-primary edit-user">
                          <span class="fas fa-pencil-alt"></span>
@@ -173,6 +180,7 @@ include('../../docs/_includes/footer.php');
 
               //This is selector of my <tbody> in my table
               $("#list-list").html(html);
+
             });
           } else {
             $("#alert").append(
@@ -229,6 +237,8 @@ include('../../docs/_includes/footer.php');
                         <td>` + data.hours + ` hrs</td>
                         <td>₹ ` + (data.hours * data.taskRate) + `</td>
                         <td>` + status + `</td>
+                        <td><iframe src="https://maps.google.com/maps?q=` + data.Latitude + `,` + data.Longitude + `&hl=es;z=14&amp;output=embed" width="80%" height="100px" frameborder="0" ></iframe></td>
+                        <td></td>
                         <td>
                         <a href="add.php?id=` + data.TaskID + `" class="btn btn-primary edit-user">
                          <span class="fas fa-pencil-alt"></span>
@@ -241,8 +251,7 @@ include('../../docs/_includes/footer.php');
 
                   //This is selector of my <tbody> in my table
                   $("#list-list").html(html);
-                }
-                else{
+                } else {
                   $("#list-list").html(`<tr style="width:100%"><td colspan="8">No Record Found...</td></tr>`);
                 }
 

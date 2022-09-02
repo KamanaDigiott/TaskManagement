@@ -80,6 +80,35 @@ if ($jwt) {
         }
       }
 
+      // alert(data.Latitude);
+      // var latlongs=[];
+      // var mylatlongs = new google.maps.LatLng(data.Latitude, data.Longitude);
+      // latlongs.push(mylatlongs);
+      // newlatlongsLength = latlongs.length;
+      // oldlatlongsLength = latlongs.length;
+      // var mapProp = {
+      //   zoom: 20,
+      //   center: latlongs[latlongs.length - 1],
+      //   mapTypeId: google.maps.MapTypeId.ROADMAP
+      // };
+
+      // var map = new google.maps.Map(document.getElementById('google-map-div'), mapProp);
+
+      // var trackPath = new google.maps.Polyline({
+      //   path: latlongs,
+      //   icons: [{
+      //     icon: {
+      //       path: google.maps.SymbolPath.FORWARD_OPEN_ARROW
+      //     },
+      //     repeat: '175px'
+      //   }],
+      //   geodesic: true,
+      //   strokeColor: '#FF0000',
+      //   strokeOpacity: 1.0,
+      //   strokeWeight: 2
+      // });
+      // trackPath.setMap(map);
+
       if (isset($_GET['action'])) {
         if ($_GET['action'] == 'select') {
           $select = "SELECT SUM(TIMESTAMPDIFF(SECOND, login_details.LoginTime, login_details.LogoutTime)/3600) as hours,users.*,login_details.* FROM login_details INNER JOIN users on users.id=login_details.UserID where login_details.LogoutTime IS NOT NULL and DATE(login_details.CreatedOn) = DATE(NOW()) ORDER BY users.id DESC";
